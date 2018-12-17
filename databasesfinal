@@ -1,0 +1,296 @@
+/***********************Creating Database Schema****************************************************************************** */
+
+CREATE SCHEMA MPGODW2821
+GO 
+
+/*************************Creating Stored procedure***************************************************************************/
+CREATE PROCEDURE MPGODW2821.INSERT_SALE
+@SALE_ID INT,
+@CAFE_ID INT,
+@PROD_ID INT,
+@CUST_ID INT,
+@ITM_TOT_PRICE DECIMAL,
+@SALE_DISCNT DECIMAL,
+@NET_SALE_AMT DECIMAL,
+@SALE_DT_TM DATETIME,
+@QTY INT,
+@UNT_PRICE DECIMAL,
+@EXT_PRICE DECIMAL,
+@DISCNT DECIMAL,
+@NET_PRICE DECIMAL
+
+AS 
+BEGIN;
+BEGIN TRANSACTION;
+INSERT INTO MPGODW2821.SALE(SALE_ID,CAFE_ID,PROD_ID,CUST_ID,ITM_TOT_PRICE,SALE_DISCNT,NET_SALE_AMT,SALE_DT_TM)
+VALUES(@SALE_ID, @CAFE_ID,@PROD_ID,@CUST_ID,@ITM_TOT_PRICE,@SALE_DISCNT, @NET_SALE_AMT,@SALE_DT_TM);
+INSERT INTO MPGODW2821.SALE_ITM(SALE_ID,PROD_ID,QTY,UNT_PRICE,EXT_PRICE,DISCNT,NET_PRICE)
+VALUES (@SALE_ID,@PROD_ID,@QTY,@UNT_PRICE,@EXT_PRICE,@DISCNT,@NET_PRICE);
+COMMIT;
+END;
+GO
+
+/*************************CREATE TABLES***************************************************************************************/
+--Table1
+CREATE TABLE MPGODW2821.Cafe
+( 
+CAFE_ID              int Primary Key NOT NULL,
+CAFE_NM              varchar(20) NULL,
+ADDR                 varchar(20) NULL ,
+CITY                 varchar(20) NULL,
+ST                   varchar(20) NULL,
+POST_CD              varchar(20) NULL,
+CNTRY                varchar(20) NULL ,
+PHN_NBR              varchar(20) NULL ,
+EMAIL_ADDR           varchar(40) NULL
+);
+
+--Table2
+CREATE TABLE MPGODW2821.CUST
+( 
+CUST_ID              int Primary Key NOT NULL,
+FRST_NM              varchar(20) NULL,
+LST_NM               varchar(20) NULL,
+ADDR                 varchar(20) NULL,
+CITY                 varchar(20) NULL,
+ST                   varchar(20) NULL,
+POST_CD              varchar(20) NULL,
+CNTRY                varchar(20) NULL,
+PHN_NBR              varchar(20) NULL,
+EMAIL_ADDR           varchar(40) NULL
+);
+
+--Table3
+CREATE TABLE MPGODW2821.SPPLY
+( 
+SPPLY_ID             int Primary Key  NOT NULL ,
+SPPLY_NM             varchar(20)  NULL ,
+ADDR                 varchar(20)  NULL ,
+CITY                 varchar(20)  NULL ,
+ST                   varchar(20)  NULL ,
+POST_CD              varchar(20)  NULL ,
+CNTRY                varchar(20)  NULL ,
+PHN_NBR              varchar(20)  NULL ,
+EMAIL_ADDR           varchar(40)  NULL 
+);
+
+--Table4
+CREATE TABLE MPGODW2821.PROD
+( 
+PROD_ID              int Primary Key NOT NULL ,
+PROD_NM              varchar(20)  NULL ,
+SIZ                  varchar(20)  NULL ,
+STD_PRICE            decimal(10,2) NULL 
+);
+
+--Table5
+CREATE TABLE MPGODW2821.SALE
+( 
+SALE_ID              int Primary Key NOT NULL ,
+CAFE_ID              int  FOREIGN KEY REFERENCES MPGODW2821.CAFE(CAFE_ID) NOT NULL ,
+PROD_ID              int  FOREIGN KEY REFERENCES MPGODW2821.PROD(PROD_ID) NOT NULL ,
+CUST_ID              int  FOREIGN KEY REFERENCES MPGODW2821.CUST(CUST_ID) NOT NULL ,
+ITM_TOT_PRICE        decimal(10,2)  NULL ,
+SALE_DISCNT          decimal(10,2)  NULL ,
+NET_SALE_AMT         decimal(10,2)  NULL ,
+SALE_DT_TM           datetime  NULL 
+);
+
+--Table6
+CREATE TABLE MPGODW2821.SALE_ITM
+( 
+SALE_ID              int FOREIGN KEY REFERENCES MPGODW2821.SALE(SALE_ID) NOT NULL,
+PROD_ID              int FOREIGN KEY REFERENCES MPGODW2821.PROD(PROD_ID) NOT NULL,
+QTY                  integer  NULL ,
+UNT_PRICE            decimal(10,2)  NULL ,
+EXT_PRICE            decimal(10,2)  NULL ,
+DISCNT               decimal(10,2)  NULL ,
+NET_PRICE            decimal(10,2)  NULL
+)
+--GO
+
+ALTER TABLE MPGODW2821.SALE_ITM
+	ADD CONSTRAINT X_SALE_ITM_PK PRIMARY KEY  CLUSTERED (SALE_ID ASC,PROD_ID ASC);
+
+--Table7
+CREATE TABLE MPGODW2821.INVNTRY
+( 
+PROD_ID              int FOREIGN KEY REFERENCES MPGODW2821.PROD(PROD_ID)NOT NULL ,
+SPPLY_ID             int FOREIGN KEY REFERENCES MPGODW2821.SPPLY(SPPLY_ID)  NOT NULL ,
+CAFE_ID              int FOREIGN KEY REFERENCES MPGODW2821.cafe(CAFE_ID) NOT NULL,
+QTY                  int  NULL 
+)
+ALTER TABLE MPGODW2821.INVNTRY
+	ADD CONSTRAINT X_INVNTRY_PK PRIMARY KEY  CLUSTERED (PROD_ID ASC,SPPLY_ID ASC,CAFE_ID ASC);	
+	
+/*************************INSERT TABLE RECORDS*********************************************************************************/
+--Cafe
+INSERT INTO MPGODW2821.Cafe
+VALUES ('001','Godwin Cafe','7 Chowning Drive','Hampton','VA','23664','USA','757-771-6576','mpgodw2821@ung.edu');
+INSERT INTO MPGODW2821.Cafe
+VALUES ('002','Mason Cafe','82 Gentry Hollow','Dawsonville','GA','30533','USA','770-530-2921','maggie.mason@gmail.com');
+INSERT INTO MPGODW2821.Cafe
+VALUES ('003','Howard Cafe','82 College Circle','Monroe','GA','12345','USA','770-657-9087','Lindsay.Howard@gmail.com');
+INSERT INTO MPGODW2821.Cafe
+VALUES ('004','Anderson Cafe','3 Duke  Glouster','Williamsburg','VA','23668','USA','757-344-7640','Colleen.Anderson@gmail.com');
+INSERT INTO MPGODW2821.Cafe
+VALUES ('005','Steves Cafe','9 Mushroom Way','Williamsburg','VA','23690','USA','757-593-1404','steve.godwin@gmail.com');
+
+--CUST
+INSERT INTO MPGODW2821.CUST
+VALUES ('1', 'Maddie','Godwin', '90 Road', 'Dahlonega','GA','30533','USA', '757-771-6576','gmadeleine98@gmail.com');
+INSERT INTO MPGODW2821.CUST
+VALUES ('2', 'Flat','Stanley', '12 Stan Road', 'Slim ','FL','09876','USA', '757-771-5215','FlatStan12@gmail.com');
+INSERT INTO MPGODW2821.CUST
+VALUES ('3', 'Austin','Godwin', '8 JMU St', 'Harrisonburg','VA','23456','USA', '757-771-7632','austin.godwin@gmail.com');
+INSERT INTO MPGODW2821.CUST
+VALUES ('4', 'Kayla','Mason', '12 Navy Way', 'Norfolk','VA','23666','USA', '757-838-3503','birdnerd@gmail.com');
+INSERT INTO MPGODW2821.CUST
+VALUES ('5', 'Stumpy','Johnson', '5 Waverly', 'Newport News','VA','23665','USA', '757-768-0284','stump@gmail.com');
+
+--SPPLY
+INSERT INTO MPGODW2821.SPPLY
+VALUES ('100', 'Coffee Bean Company', '100 Coffee Road', 'Coffee ','GA','30533','USA', '770-123-4567','CBC@gmail.com');
+INSERT INTO MPGODW2821.SPPLY
+VALUES ('200', 'Dough Company','Cookie Road', 'Hampton','FL','0986','USA', '123-321-4564','cookieforyou@gmail.com');
+INSERT INTO MPGODW2821.SPPLY
+VALUES ('300', 'Stir Stick Company', '2 Stick Drive', 'Cumming','GA','37586','USA', '987-654-3210','StirStick@gmail.com');
+INSERT INTO MPGODW2821.SPPLY
+VALUES ('400', 'Milk Cow Company', '100 Moo Way', 'Newport News','VA','23666','USA', '757-000-0987','Mood@gmail.com');
+INSERT INTO MPGODW2821.SPPLY
+VALUES ('500',' Paper Cup Company ','68 Cup Drive', 'Newport News','VA','23665','USA', '757-876-3333','Cups@gmail.com');
+
+--PROD
+INSERT INTO MPGODW2821.PROD
+VALUES ('111', 'Black Coffee', 'MED','2.80');
+INSERT INTO MPGODW2821.PROD
+VALUES ('222', 'Cookie', 'Big','3.00');
+INSERT INTO MPGODW2821.PROD
+VALUES ('333', 'White Mocha', 'Large','5.80');
+INSERT INTO MPGODW2821.PROD
+VALUES ('444','Hot Chocolate', 'Small','2.00');
+INSERT INTO MPGODW2821.PROD
+VALUES ('555', 'Tea', 'Large','3.00');
+
+--INVNTRY 
+INSERT INTO MPGODW2821.INVNTRY
+VALUES ('111', '100', '001', '100');
+INSERT INTO MPGODW2821.INVNTRY
+VALUES ('222', '200', '002', '200');
+INSERT INTO MPGODW2821.INVNTRY
+VALUES ('333', '300', '003', '300');
+INSERT INTO MPGODW2821.INVNTRY
+VALUES ('444', '400', '004', '500');
+INSERT INTO MPGODW2821.INVNTRY
+VALUES ('555', '500', '005', '900');
+
+
+/*************************EXEC Calls for Stored Procedure*******************************************************************************/
+--1
+EXEC MPGODW2821.INSERT_SALE 
+@SALE_ID = 11,
+@CAFE_ID = 1,
+@PROD_ID = 111,
+@CUST_ID = 1,
+@ITM_TOT_PRICE = 60.00,
+@SALE_DISCNT = 10.00,
+@NET_SALE_AMT = 50.00,
+@SALE_DT_TM = '2018-01-07 16:00',
+@QTY = 90,
+@UNT_PRICE = 100.00,
+@EXT_PRICE = 10.00,
+@DISCNT = 10.00,
+@NET_PRICE = 90.00;
+
+--2
+EXEC MPGODW2821.INSERT_SALE 
+@SALE_ID = 22,
+@CAFE_ID = 2,
+@PROD_ID = 222,
+@CUST_ID = 2,
+@ITM_TOT_PRICE = 60.00,
+@SALE_DISCNT = 10.00,
+@NET_SALE_AMT = 50.00,
+@SALE_DT_TM = '2018-01-07 16:00',
+@QTY = 90,
+@UNT_PRICE = 100.00,
+@EXT_PRICE = 10.00,
+@DISCNT = 10.00,
+@NET_PRICE = 90.00;
+
+--3
+EXEC MPGODW2821.INSERT_SALE 
+@SALE_ID = 33,
+@CAFE_ID = 3,
+@PROD_ID = 333,
+@CUST_ID = 3,
+@ITM_TOT_PRICE = 60.00,
+@SALE_DISCNT = 10.00,
+@NET_SALE_AMT = 50.00,
+@SALE_DT_TM = '2018-01-07 16:00',
+@QTY = 90,
+@UNT_PRICE = 100.00,
+@EXT_PRICE = 10.00,
+@DISCNT = 10.00,
+@NET_PRICE = 90.00;
+
+--4
+EXEC MPGODW2821.INSERT_SALE 
+@SALE_ID = 44,
+@CAFE_ID = 4,
+@PROD_ID = 444,
+@CUST_ID = 4,
+@ITM_TOT_PRICE = 60.00,
+@SALE_DISCNT = 10.00,
+@NET_SALE_AMT = 50.00,
+@SALE_DT_TM = '2018-01-07 16:00',
+@QTY = 90,
+@UNT_PRICE = 100.00,
+@EXT_PRICE = 10.00,
+@DISCNT = 10.00,
+@NET_PRICE = 90.00;
+
+--5
+EXEC MPGODW2821.INSERT_SALE 
+@SALE_ID = 55,
+@CAFE_ID = 5,
+@PROD_ID = 555,
+@CUST_ID = 5,
+@ITM_TOT_PRICE = 60.00,
+@SALE_DISCNT = 10.00,
+@NET_SALE_AMT = 50.00,
+@SALE_DT_TM = '2018-01-07 16:00',
+@QTY = 90,
+@UNT_PRICE = 100.00,
+@EXT_PRICE = 10.00,
+@DISCNT = 10.00,
+@NET_PRICE = 90.00;
+
+/* For Testing Purposes*/
+/*
+DROP TABLE MPGODW2821.INVNTRY
+DROP TABLE MPGODW2821.SALE_ITM
+DROP TABLE MPGODW2821.SALE
+DROP TABLE MPGODW2821.PROD
+DROP TABLE MPGODW2821.SPPLY
+DROP TABLE MPGODW2821.CUST
+DROP TABLE MPGODW2821.Cafe 
+DROP PROCEDURE MPGODW2821.INSERT_SALE
+DROP SCHEMA MPGODW2821
+*/
+/* 
+SELECT *
+FROM MPGODW2821.SALE 
+ SELECT *
+FROM MPGODW2821.SALE_ITM 
+ SELECT *
+FROM MPGODW2821.Cafe; 
+SELECT *
+FROM MPGODW2821.CUST;
+SELECT *
+FROM MPGODW2821.SPPLY;
+SELECT *
+FROM MPGODW2821.PROD;
+SELECT *
+FROM MPGODW2821.INVNTRY 
+*/
